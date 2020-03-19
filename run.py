@@ -10,8 +10,8 @@ from sklearn import metrics
 from tensorflow import keras
 from data_utils.config import BaseConfig
 from data_utils.data_processor import OneInputDataProcessor, TwoInputDataProcessor
-from data_utils.tokenization import load_vocab_ids, features_labels_digitalize
-from model import text_classification_model, text_similarity_model
+from data_utils.tokenization import load_vocab_ids, features_labels_digitalize, text_to_sequence
+from tensorflow_model import text_classification_model, text_similarity_model
 
 warnings.simplefilter('ignore')
 tf.logging.set_verbosity(tf.logging.INFO)
@@ -110,7 +110,7 @@ def train(config):
                 count = len(test_text_a)
                 n = count // config['batch_size'] + 1
                 with tf.gfile.GFile(os.path.join(FLAGS.data_dir, 'predict.csv'), 'w') as f:
-                    for i in range(n):
+                    for i in xrange(n):
                         if (i + 1) * config['batch_size'] >= count:
                             x_a = test_text_a[i * config['batch_size']:]
                             x_b = test_text_b[i * config['batch_size']:]
@@ -121,7 +121,7 @@ def train(config):
                         predictions = model.predict_on_batch([x_a, x_b])
                         result = np.argmax(predictions, axis=1)
 
-                        for j in range(len(result)):
+                        for j in xrange(len(result)):
                             index = i * config['batch_size'] + j
                             f.write(
                                 '%s\t%s\t%s\n' % (test_examples[index].text_a, test_examples[index].text_b, result[j]))
@@ -166,11 +166,156 @@ def train(config):
             builder.save()
 
 
+def model_predict(model_path, texts, predict_result_path, word_index):
+    reviewids = []
+    shoptypes = []
+    reviews = []
+    for line in texts:
+        fields = line.strip().split('\t')
+        if len(fields) != 3:
+            continue
+        reviewids.append(fields[0])
+        shoptypes.append(fields[2])
+        reviews.append(fields[1])
+    review_ids = [text_to_sequence(review, word_index) for review in reviews]
+    review_ids = tf.keras.preprocessing.sequence.pad_sequences(review_ids, value=word_index['[PAD]'], padding='post',
+                                                               maxlen=500)
+
+    model = tf.keras.models.load_model(model_path)
+    result = model.predict(review_ids)
+    label = np.argmax(result, axis=1)
+
+    with tf.gfile.GFile(predict_result_path, 'w') as writer:
+        writer.write(
+            "reviewid\tshoptype\tlabel\tresult\treview\n")
+        for i in range(len(reviews)):
+            writer.write("%s\t%s\t%s\t%s\t%s\n" % (
+                reviewids[i], shoptypes[i], str(label[i]), str(result[i]), reviews[i]))
+
+
+def model_predict2(model_path, texts, word_index):
+    reviewids = []
+    reviews = []
+    for line in texts:
+        fields = line.strip().split('\t')
+        if len(fields) != 2:
+            continue
+        reviewids.append(fields[0])
+        reviews.append(fields[1])
+    review_ids = [text_to_sequence(review, word_index) for review in reviews]
+    review_ids = tf.keras.preprocessing.sequence.pad_sequences(review_ids, value=word_index['[PAD]'], padding='post',
+                                                               maxlen=500)
+
+    model = tf.keras.models.load_model(model_path)
+    result = model.predict(review_ids)
+    label = np.argmax(result, axis=1)
+    return label
+
+
+def predict2():
+    predict_base_path = "/Users/lionel/Desktop/data/review_relation/predict/content_relation.csv"
+    reviews = []
+    contentids = []
+    reviewlist = []
+    with tf.gfile.GFile(predict_base_path, 'r') as reader:
+        for line in reader:
+            fields = line.strip().split("\t")
+            if len(fields) != 2:
+                continue
+            contentids.append(fields[0])
+            reviewlist.append(fields[1])
+            reviews.append(line.strip())
+
+    words_path = "/Users/lionel/Desktop/data/review_relation/bert_words.csv"
+    word_index = load_vocab_ids(words_path, sep='\t')
+    model_base_path = "/Users/lionel/Desktop/data/review_relation/version2/"
+    predict_result_base_path = "/Users/lionel/Desktop/data/review_relation/content_pic_relation/content_relation_res.csv"
+    food_label = model_predict2(os.path.join(model_base_path, 'food2.h5'), reviews, word_index)
+    jiudian_label = model_predict2(os.path.join(model_base_path, 'jiudian.h5'), reviews, word_index)
+    liren_label = model_predict2(os.path.join(model_base_path, 'liren.h5'), reviews, word_index)
+    yule_label = model_predict2(os.path.join(model_base_path, 'yule.h5'), reviews, word_index)
+    gouwu_label = model_predict2(os.path.join(model_base_path, 'gouwu.h5'), reviews, word_index)
+
+    with tf.gfile.GFile(predict_result_base_path, 'w') as writer:
+        writer.write(
+            "contentid\tfood\tjiudian\tliren\tyule\tgouwu\tcontentbody\n")
+        for i in xrange(len(contentids)):
+            writer.write("%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (
+                contentids[i], str(food_label[i]), str(jiudian_label[i]), str(liren_label[i]), str(yule_label[i]),
+                str(gouwu_label[i]), reviews[i]))
+
+
+def predict():
+    predict_base_path = "/Users/lionel/Desktop/data/review_relation/predict/review_relation_predict.csv"
+
+    predict_base_path = "/Users/lionel/Desktop/data/review_relation/predict/content_relation.csv"
+
+    food_reviews = []
+    liren_reviews = []
+    jiudian_reviews = []
+    yule_reviews = []
+    gouwu_reviews = []
+
+    with tf.gfile.GFile(predict_base_path, 'r') as  reader:
+        for line in reader:
+            fields = line.strip().split('\t')
+            if fields[2] == "美食":
+                food_reviews.append(line)
+            elif fields[2] == "丽人":
+                liren_reviews.append(line)
+            elif fields[2] == "酒店":
+                jiudian_reviews.append(line)
+            elif fields[2] == "休娱":
+                yule_reviews.append(line)
+            else:
+                gouwu_reviews.append(line)
+
+    words_path = "/Users/lionel/Desktop/data/review_relation/bert_words.csv"
+    word_index = load_vocab_ids(words_path, sep='\t')
+
+    model_base_path = "/Users/lionel/Desktop/data/review_relation/version2/"
+    predict_result_base_path = "/Users/lionel/Desktop/data/review_relation/predict_result/"
+    model_predict(os.path.join(model_base_path, 'food2.h5'), food_reviews,
+                  os.path.join(predict_result_base_path, 'food_predict_result2.csv'), word_index)
+    model_predict(os.path.join(model_base_path, 'jiudian.h5'), jiudian_reviews,
+                  os.path.join(predict_result_base_path, 'jiudian_predict_result2.csv'), word_index)
+    model_predict(os.path.join(model_base_path, 'liren.h5'), liren_reviews,
+                  os.path.join(predict_result_base_path, 'liren_predict_result2.csv'), word_index)
+    model_predict(os.path.join(model_base_path, 'yule.h5'), yule_reviews,
+                  os.path.join(predict_result_base_path, 'yule_predict_result2.csv'), word_index)
+    model_predict(os.path.join(model_base_path, 'gouwu.h5'), gouwu_reviews,
+                  os.path.join(predict_result_base_path, 'gouwu_predict_result2.csv'), word_index)
+
+
 def main(_):
     config = BaseConfig.from_json_file(os.path.join(FLAGS.data_dir, 'config.json')).to_dict()
     train(config)
 
 
 if __name__ == '__main__':
-    flags.mark_flag_as_required("data_dir")
-    tf.app.run()
+    # predict()
+    # predict2()
+    # tf.app.run()
+    # sess = tf.Session()
+    # a = tf.one_hot([0, 1, 2, 3, 4, 5, 6, 7], depth=8)
+    # print sess.run(a[1])
+    #
+    #
+    # from tensorflow import  keras
+    #
+    # print keras.utils.to_categorical()
+
+    path = '/tmp/part-r-00031'
+    dataset = tf.data.TFRecordDataset(path).batch(10)
+    iterator = dataset.make_one_shot_iterator()
+    # next_element = iterator.get_next()
+
+    with tf.Session() as sess:
+        while True:
+            try:
+                x,y = sess.run(iterator.get_next())
+                for ele in x:
+                    print(ele)
+                break
+            except tf.errors.OutOfRangeError:
+                break
