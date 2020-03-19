@@ -22,17 +22,17 @@ FLAGS = flags.FLAGS
 flags.DEFINE_integer("shuffle_size", 10000, "train data shuffle buffer size")
 flags.DEFINE_integer("batch_size", 1000, "train data batch size")
 flags.DEFINE_integer("epoch", 5, "epoch size")
-flags.DEFINE_string("train_path", "/Users/lionel/Desktop/data/dish/dish_verify/data/train_tfrecord/",
+flags.DEFINE_string("train_path", "../data/dish/dish_verify/data/train_tfrecord/",
                     "The path of train data")
-flags.DEFINE_string("valid_path", "/Users/lionel/Desktop/data/dish/dish_verify/data/valid_tfrecord/",
+flags.DEFINE_string("valid_path", "../data/dish/dish_verify/data/valid_tfrecord/",
                     "The path of train data")
 flags.DEFINE_string("predict_path", "/tmp/2.csv",
                     'The path of predict data')
-flags.DEFINE_string("word_path", "/Users/lionel/Desktop/chinese_L-12_H-768_A-12/vocab.txt",
+flags.DEFINE_string("word_path", "../chinese_L-12_H-768_A-12/vocab.txt",
                     'The path of words dictionary')
 flags.DEFINE_string("model_path", "/tmp/model2",
                     "The path of saved model")
-flags.DEFINE_string("model_config_path", "/Users/lionel/Desktop/data/dish/dish_verify/config.json",
+flags.DEFINE_string("model_config_path", "../data/dish/dish_verify/config.json",
                     "The path of model config path")
 
 def _parse_text2(text):

@@ -213,7 +213,7 @@ def model_predict2(model_path, texts, word_index):
 
 
 def predict2():
-    predict_base_path = "/Users/lionel/Desktop/data/review_relation/predict/content_relation.csv"
+    predict_base_path = "../data/review_relation/predict/content_relation.csv"
     reviews = []
     contentids = []
     reviewlist = []
@@ -226,10 +226,10 @@ def predict2():
             reviewlist.append(fields[1])
             reviews.append(line.strip())
 
-    words_path = "/Users/lionel/Desktop/data/review_relation/bert_words.csv"
+    words_path = "../data/review_relation/bert_words.csv"
     word_index = load_vocab_ids(words_path, sep='\t')
-    model_base_path = "/Users/lionel/Desktop/data/review_relation/version2/"
-    predict_result_base_path = "/Users/lionel/Desktop/data/review_relation/content_pic_relation/content_relation_res.csv"
+    model_base_path = "../data/review_relation/version2/"
+    predict_result_base_path = "../data/review_relation/content_pic_relation/content_relation_res.csv"
     food_label = model_predict2(os.path.join(model_base_path, 'food2.h5'), reviews, word_index)
     jiudian_label = model_predict2(os.path.join(model_base_path, 'jiudian.h5'), reviews, word_index)
     liren_label = model_predict2(os.path.join(model_base_path, 'liren.h5'), reviews, word_index)
@@ -246,9 +246,8 @@ def predict2():
 
 
 def predict():
-    predict_base_path = "/Users/lionel/Desktop/data/review_relation/predict/review_relation_predict.csv"
 
-    predict_base_path = "/Users/lionel/Desktop/data/review_relation/predict/content_relation.csv"
+    predict_base_path = "../data/review_relation/predict/content_relation.csv"
 
     food_reviews = []
     liren_reviews = []
@@ -270,11 +269,11 @@ def predict():
             else:
                 gouwu_reviews.append(line)
 
-    words_path = "/Users/lionel/Desktop/data/review_relation/bert_words.csv"
+    words_path = "../data/review_relation/bert_words.csv"
     word_index = load_vocab_ids(words_path, sep='\t')
 
-    model_base_path = "/Users/lionel/Desktop/data/review_relation/version2/"
-    predict_result_base_path = "/Users/lionel/Desktop/data/review_relation/predict_result/"
+    model_base_path = "../data/review_relation/version2/"
+    predict_result_base_path = "../data/review_relation/predict_result/"
     model_predict(os.path.join(model_base_path, 'food2.h5'), food_reviews,
                   os.path.join(predict_result_base_path, 'food_predict_result2.csv'), word_index)
     model_predict(os.path.join(model_base_path, 'jiudian.h5'), jiudian_reviews,

@@ -38,10 +38,10 @@ def parse_line(line, words):
 
 
 def train():
-    train_path = '/Users/lionel/Desktop/train.csv'
-    valid_path = '/Users/lionel/Desktop/valid.csv'
+    train_path = '../train.csv'
+    valid_path = '../valid.csv'
 
-    words_path = '/Users/lionel/Desktop/data/review_relation/bert_words.csv'
+    words_path = '../data/review_relation/bert_words.csv'
 
     words = load_vocab_ids(words_path, sep='\t')
 
@@ -109,7 +109,7 @@ def train():
 
 
 def predict(text):
-    words_path = '/Users/lionel/Desktop/data/review_relation/bert_words.csv'
+    words_path = '../data/review_relation/bert_words.csv'
 
     words = load_vocab_ids(words_path, sep='\t')
     wordIds = text_to_ids(text, words)
@@ -164,7 +164,7 @@ if __name__ == '__main__':
     # predict(text)
 
 
-    # words_path = '/Users/lionel/Desktop/data/review_relation/bert_words.csv'
+    # words_path = '../data/review_relation/bert_words.csv'
     #
     # words = load_vocab_ids(words_path, sep='\t')
     #

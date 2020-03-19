@@ -7,7 +7,7 @@ import tensorflow as tf
 
 from data_utils import reader
 
-DATA_PATH = "/Users/lionel/Desktop/data/nlp/data/ptb"
+DATA_PATH = ""
 HIDDEN_SIZE = 200
 NUM_LAYERS = 2
 VOCAB_SIZE = 10000

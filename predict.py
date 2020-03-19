@@ -54,9 +54,9 @@ def input_fn(path, vocab, config, batch_size):
 
 
 if __name__ == "__main__":
-    config = BaseConfig.from_json_file("/Users/lionel/Desktop/data/dish/dish_similarity/config.json").to_dict()
+    config = BaseConfig.from_json_file("../data/dish/dish_similarity/config.json").to_dict()
     path = "/tmp/valid.csv"
-    word_path = "/Users/lionel/Desktop/data/dish/dish_similarity/words.csv"
+    word_path = "../data/dish/dish_similarity/words.csv"
     word_index = load_vocab_ids(word_path)
     signature_key = 'predict_label'
     sess_config = tf.ConfigProto()
@@ -68,7 +68,7 @@ if __name__ == "__main__":
         next_element = iterator.get_next()
 
         meta_graph_def = tf.saved_model.loader.load(sess, [tf.saved_model.tag_constants.SERVING],
-                                                    "/Users/lionel/Desktop/data/dish/dish_similarity/saved_model/4")
+                                                    "../data/dish/dish_similarity/saved_model/4")
         signature = meta_graph_def.signature_def
         text_a = signature[signature_key].inputs["text_a"].name
         text_b = signature[signature_key].inputs["text_b"].name

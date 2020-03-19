@@ -56,7 +56,7 @@ if __name__ == '__main__':
     import pandas as pd
     import os
 
-    base_path = '/Users/lionel/Desktop/data/topicContent/'
+    base_path = ''
     valid_data = pd.read_csv(os.path.join(base_path, 'valid.csv'), sep='[\t|,]', header=None, engine='python')
     # valid_data = valid_data.fillna(value=2.786950)
 
